@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html style="height:100%">
+  <head>
+    <base target="_top">
+  </head>
+  <body style="height:100%">
+  <p hidden id="key"><?= key ?></p>
+  <p hidden id="sheetName"><?= sheetName ?></p>
+  <p hidden id="rangeA1"><?= rangeA1 ?></p>
+  <p hidden id="dbSheet"><?= dbSheet ?></p>
+  <p hidden id="spreadsheetId"><?= spreadsheetId ?></p>
+  <p hidden id="error"><?= error ?></p>
+  <p hidden id="note"><?= note ?></p>
+  <p hidden id="oldnote"><?= oldnote ?></p>  
+  <p hidden id="isFirst">true</p>  
+  <p hidden id="pollTimes">0</p>    
+  <p hidden id="shouldPoll">false</p>   
+  <p hidden id="isSidebar">false</p>  
+  <p hidden id="lastPoll">0</p>    
+  <p hidden id="pollTimesSaving">0</p>  
+   
+  <?!= include('JavaScript'); ?>
+
+
+  <textarea name="editor1" style="height:100%"></textarea>
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+
+  <script>
+ 
+  
+  var editor = CKEDITOR.replace( 'editor1', {
+			// Define the toolbar groups as it is a more accessible solution.
+
+
+        
+	toolbar : [
+          {"name":"sidenotes","items":['Collapse','SidebarEditor','DeleteSideNote','ExportAll','ExportSelected','SideNoteHelp','Inform']},
+          '/',
+          { "name": 'basicstyles', "items": [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript'] },
+          {"name":"links","items":['Link', 'Unlink', 'Anchor' ]},
+          {"name":"styles","items":['Font', 'FontSize']},
+          {"name":"insert","items":[ 'Image', 'Table', 'HorizontalRule',  'SpecialChar' ]},
+          {"name":"paragraph","items":['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']},
+          {"name":"styles","items":['Format', 'Styles']},
+          {"name": "document", "items": [  'Source',  'Print'] },
+
+],
+    
+			// Remove the redundant buttons from toolbar groups defined above.
+            removeButtons: 'Maximize,ShowBlocks,Templates,Save,NewPage,Preview,Smiley,Flash,HorizontalLine,PageBreak,Iframe',
+			//removeButtons: 'Strike,Blockquote,Anchor,Styles,Format,Specialchar,Maximize,Save,NewPage,Preview,Print,Flash,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
+            language: 'en',
+            //Resize to max on startup
+            on :{
+              // Maximize the editor on start-up.
+              'instanceReady' : function( evt ){
+                 evt.editor.execCommand( 'maximize' );
+              }
+            } ,
+            
+		} );
+  
+
+  //this makes links clickable. Yay! see here: https://codepen.io/f1ames/pen/JyJRQg?editors=1010
+  editor.on( 'contentDom', function() {
+      var editable = editor.editable();
+      editable.attachListener( editable, 'click', function( evt ) {
+        var link = new CKEDITOR.dom.elementPath( evt.data.getTarget(), this ).contains( 'a' );
+        if ( link && evt.data.$.button != 2  ) {
+          window.open( link.getAttribute( 'href' ) );
+        }
+      }, null, null, 15 );
+    } );
+  
+  CKEDITOR.instances.editor1.setData(<?= note ?>);
+  
+  CKEDITOR.instances.editor1.ui.addButton('Collapse', { // add new button and bind our command
+     label: "ShrinkButton",
+     command: 'minimize',
+     toolbar: 'sidenotes',
+  });
+  
+  /*
+  CKEDITOR.instances.editor1.ui.addButton('SidebarEditor', { // add new button and bind our command
+     label: "Cell Notes sidebar editor",
+     command: 'minimize',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/4SNJNTp.png' //'https://d30y9cdsu7xlg0.cloudfront.net/png/63053-200.png'
+
+  }); 
+  */
+  
+  CKEDITOR.instances.editor1.addCommand("deleteSideNote", { // create named command
+     exec: function(edt) {
+        //google.script.run.showAlert("will now delete the note","here we should check with the user if it's fine");
+        deleteSideNote();
+     }
+  });
+  
+  CKEDITOR.instances.editor1.ui.addButton('DeleteSideNote', { // add new button and bind our command
+     label: "Delete cell note",
+     command: 'deleteSideNote',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/HMXGUvJ.png'
+
+  });
+   
+   
+
+  
+ CKEDITOR.instances.editor1.addCommand("minimize", { // create named command
+     exec: function(edt) {
+        minimize();
+     }
+  });  
+  
+
+  
+  //CKEDITOR.instances.editor1.getCommand( 'inform' ).disable();
+    
+  CKEDITOR.instances.editor1.ui.addButton('ExportAll', { // add new button and bind our command
+     label: "Export all cell notes",
+     command: 'exportAll',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/CIZ4Abq.png' 
+  });
+  
+  CKEDITOR.instances.editor1.addCommand("exportAll", { // create named command
+     exec: function(edt) {
+        google.script.run.exportAllMenu();
+     }
+  });  
+  
+  
+  CKEDITOR.instances.editor1.ui.addButton('ExportSelected', { // add new button and bind our command
+     label: "Export selected cell notes",
+     command: 'exportSelected',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/2XBPnDa.png' 
+  });
+  
+    CKEDITOR.instances.editor1.ui.addButton('Inform', { // add new button and bind our command
+     label: "Cell Notes info",
+     command: 'inform',
+     toolbar: 'sidenotes'
+  });
+
+  CKEDITOR.instances.editor1.addCommand("exportSelected", { // create named command
+     exec: function(edt) {
+        google.script.run.exportSelected();
+     }
+  });  
+
+  if (document.getElementsByClassName("cke_toolbar_break").style!=undefined){
+      document.getElementsByClassName("cke_toolbar_break").style.borderBottom="1px solid lightgray";
+  }
+
+  /*
+  CKEDITOR.instances.editor1.addCommand("sideNotesHelp", { // create named command
+     exec: function(edt) {
+        google.script.run.openHelp();
+     }
+  });  
+  
+  CKEDITOR.instances.editor1.ui.addButton('SideNoteHelp', { // add new button and bind our command
+     label: "Cell Notes Help",
+     command: 'sideNotesHelp',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/fYomWLS.png'
+
+  });
+  */
+  
+  
+  
+  </script>
+
+
+
+  <!-- Minified google hosted jquery (see https://developers.google.com/speed/libraries/)
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+-->
+
+  <!-- And here's where the magic happens - https://stackoverflow.com/questions/26092149/capture-onclose-event-for-spreadsheet-app-modal-dialog-in-google-apps-script 
+  <script type="text/javascript">
+      /*
+          function minimizeOnClose(){
+              google.script.run
+        .withSuccessHandler(
+            function() {
+                console.log('success!');
+         })
+        .withFailureHandler(
+            function(msg, element) {
+                console.log('failure!');
+         })
+        .showAlert("Closing","Will disappear now");
+        }
+  
+    $(document).ready( e => {
+      console.log('-- DOM ready --');
+      
+
+      
+     
+      $(window).on('beforeunload', e => {
+      //minimizeOnClose();
+
+      //google.script.run.showSideNoteSidebar();
+        console.log('closed!');
+        // do pre-unload stuff
+      });
+    });
+*/
+    
+  </script>
+-->
+
+ </body>
+</html>

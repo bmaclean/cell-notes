@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html style="height:100%">
+  <head>
+      <base target="_top">
+  </head>
+  <body style="height:100%">
+  <p hidden id="key"><?= key ?></p>
+  <p hidden id="sheetName"><?= sheetName ?></p>
+  <p hidden id="rangeA1"><?= rangeA1 ?></p>
+  <p hidden id="dbSheet"><?= dbSheet ?></p>
+  <p hidden id="spreadsheetId"><?= spreadsheetId ?></p>
+  <p hidden id="error"><?= error ?></p>
+  <p hidden id="note"><?= note ?></p>  
+  <p hidden id="oldnote"><?= oldnote ?></p>  
+  <p hidden id="isFirst">true</p>  
+  <p hidden id="pollTimes">0</p>  
+  <p hidden id="shouldPoll">false</p>    
+  <p hidden id="isSidebar">true</p>    
+  <p hidden id="lastPoll">0</p>  
+  <p hidden id="pollTimesSaving">0</p>  
+  
+  <?!= include('JavaScript'); ?>
+    
+  <textarea name="editor1" style="height:100%"></textarea>
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+
+  <script>
+  
+  var editor = CKEDITOR.replace( 'editor1', {
+
+			// Define the toolbar groups as it is a more accessible solution.
+            
+			toolbarGroups: [
+                {"name":"sidenotes"},
+                '/',
+				{"name":"basicstyles","groups":["basicstyles"]},
+				{"name":"paragraph","groups":["list","indent"]},
+                {"name":"links","groups":["links"]},
+
+      
+
+			],
+			// Remove the redundant buttons from toolbar groups defined above.
+			removeButtons: 'Strike,Blockquote,Font,FontSize,Anchor,Styles,Format,Specialchar,Maximize,Save,NewPage,Preview,Print,Flash,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Underline,Superscript,Subscript,ShowBlocks,Image,Table',
+            entities: false,
+             allowedContent: true,
+             language: 'en',
+             //contentsCss: [ 'content.css', 'https://ssl.gstatic.com/docs/script/css/add-ons1.css' ],
+             //addCss( '#cke_button__fullSize { background: #f5f5f5; } '),
+            //Resize to max on startup
+            on :{
+              // Maximize the editor on start-up.
+              'instanceReady' : function( evt ){
+                 evt.editor.execCommand( 'maximize' );
+              },
+             
+           
+            } 
+		} );
+        
+
+  
+  //this makes links clickable. Yay! see here: https://codepen.io/f1ames/pen/JyJRQg?editors=1010
+  editor.on( 'contentDom', function() {
+      var editable = editor.editable();
+      editable.attachListener( editable, 'click', function( evt ) {
+        var link = new CKEDITOR.dom.elementPath( evt.data.getTarget(), this ).contains( 'a' );
+        if ( link && evt.data.$.button != 2  ) {
+          window.open( link.getAttribute( 'href' ) );
+        }
+      }, null, null, 15 );
+    } );
+  
+  CKEDITOR.instances.editor1.setData(<?= note ?>);
+
+  CKEDITOR.instances.editor1.addCommand("fullsize", { // create named command
+     exec: function(edt) {
+        fullSize();
+     }
+  }); 
+  
+    CKEDITOR.instances.editor1.ui.addButton('Expand', { // add new button and bind our command
+     label: "ExpandButton",
+     command: 'fullsize',
+     toolbar: 'sidenotes',
+  });
+  
+
+  
+ 
+  /*
+  CKEDITOR.instances.editor1.ui.addButton('Full size editor', { // add new button and bind our command
+     label: "Full size editor",
+     command: 'fullSize',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/TYDKmBi.png'//'https://d30y9cdsu7xlg0.cloudfront.net/png/6410-200.png'
+
+  });
+*/
+  CKEDITOR.instances.editor1.addCommand("deleteSideNote", { // create named command
+     exec: function(edt) {
+        deleteSideNote();
+     }
+  });
+  
+  CKEDITOR.instances.editor1.ui.addButton('Delete SideNote', { // add new button and bind our command
+     label: "Delete cell note",
+     command: 'deleteSideNote',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/HMXGUvJ.png' //'https://d30y9cdsu7xlg0.cloudfront.net/png/377968-200.png'
+
+  });
+
+
+
+  //CKEDITOR.instances.editor1.getCommand( 'inform' ).disable();
+  
+
+  
+  
+  
+  CKEDITOR.instances.editor1.ui.addButton('ExportAll', { // add new button and bind our command
+     label: "Export all cell notes",
+     command: 'exportAll',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/CIZ4Abq.png' 
+  });
+  
+  CKEDITOR.instances.editor1.addCommand("exportAll", { // create named command
+     exec: function(edt) {
+        google.script.run.exportAllMenu();
+     }
+  });  
+  
+  
+  CKEDITOR.instances.editor1.ui.addButton('ExportSelected', { // add new button and bind our command
+     label: "Export selected cell notes",
+     command: 'exportSelected',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/2XBPnDa.png' 
+  });
+
+  CKEDITOR.instances.editor1.addCommand("exportSelected", { // create named command
+     exec: function(edt) {
+        google.script.run.exportSelected();
+     }
+  });
+  
+  
+  CKEDITOR.instances.editor1.ui.addButton('PromptNoImage', { // add new button and bind our command
+     label: "Insert image",
+     command: 'promptNoImageOnSidebar',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/HfwvDeZ.png' 
+  });
+
+  CKEDITOR.instances.editor1.addCommand("promptNoImageOnSidebar", { // create named command
+     exec: function(edt) {
+        google.script.run.promptNoImageOnSidebar();
+     }
+  });
+  
+
+  CKEDITOR.instances.editor1.ui.addButton('Inform', { // add new button and bind our command
+     label: "Cell Notes info",
+     command: 'inform',
+     toolbar: 'sidenotes'
+  });
+  
+  /*
+  CKEDITOR.instances.editor1.addCommand("sideNotesHelp", { // create named command
+     exec: function(edt) {
+        google.script.run.openHelp();
+     }
+  });  
+  
+  CKEDITOR.instances.editor1.ui.addButton('SideNote help', { // add new button and bind our command
+     label: "Cell Notes Help",
+     command: 'sideNotesHelp',
+     toolbar: 'sidenotes',
+     icon: 'https://i.imgur.com/fYomWLS.png' //'https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-help-128.png'
+
+  });
+  */
+  
+  //CKEDITOR.instances.editor1.getCommand( 'inform' ).disable();
+  
+  //CKEDITOR.instances.editor1.getCommand( 'error' ).disable();
+  //CKEDITOR.instances.editor1.resize('100%','500');
+
+  </script>
+
+
+ </body>
+</html>
