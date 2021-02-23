@@ -1,0 +1,22 @@
+{
+  "name": "cell-notes",
+  "version": "1.1.0",
+  "description": "Cell notes app for Google Sheets.",
+  "main": "SideNote.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bmaclean/cell-notes.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bmaclean/cell-notes/issues"
+  },
+  "homepage": "https://github.com/bmaclean/cell-notes#readme",
+  "dependencies": {
+    "@types/google-apps-script": "^1.0.26"
+  }
+}
