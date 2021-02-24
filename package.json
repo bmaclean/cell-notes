@@ -16,7 +16,9 @@
     "url": "https://github.com/bmaclean/cell-notes/issues"
   },
   "homepage": "https://github.com/bmaclean/cell-notes#readme",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^7.20.0",
     "@types/google-apps-script": "^1.0.26"
   }
 }
