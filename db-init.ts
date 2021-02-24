@@ -1,11 +1,7 @@
-
-
 var SNSHEETNAME = "Cell Notes Store";
 var SNDBSHEETID = "SidenotesDatabaseSheetID";
 
 function checkSidenoteDatabase(ss) {
-  
-  
   //If sheet with name found, make sure it's hidden (?)
   var sheetId = PropertiesService.getDocumentProperties().getProperty(SNDBSHEETID);
   var sheet = getSheetById(ss,sheetId);//

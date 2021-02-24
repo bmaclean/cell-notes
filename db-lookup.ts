@@ -32,13 +32,13 @@ function getNoteWithKey(sheet,key){
   
   //row data
   if(key!=null){
-    if(key>-1){
+    if (key >- 1) {
       var rowData = sheet.getRange(key,1,1,4).getValues();
       
       //convert into SideNote object. 
       //mfg_tag assuming the order of the headers will stay the same for now
       if (rowData != undefined){
-        var content = rowData[0][0]=="DELETED"?"":rowData[0][contentCol];
+        var content = rowData[0][0]=="DELETED" ? "" : rowData[0][contentCol];
         var rowValuesForKey = new SideNote(key,rowData[0][1],rowData[0][2],content);
         return rowValuesForKey;
       }

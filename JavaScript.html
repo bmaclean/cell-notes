@@ -34,8 +34,7 @@ function handleFormSubmit() {
 
 }
 
-function updateCellRange(){
-
+function updateCellRange() {
     var dbsheet = document.getElementById("dbSheet").innerHTML;
     document.getElementById("note").innerHTML = CKEDITOR.instances.editor1.getData();
     var htmlOutput = document.getElementById("note").innerHTML;
@@ -64,17 +63,20 @@ function updateCellRange(){
             +"font-family: arial, sans-serif;"
             +"font-size: 11px;"
             +"font-weight: bold;"
-            +"height: 29px;"
             +"line-height: 27px;"
             +"margin: 0;"
             +"min-width: 72px;"
             +"outline: 0;"
-            +"padding: 0 8px;"
+            +"padding: 8px;"
             +"text-align: center;"
             +"white-space: nowrap;"
             +"text-decoration:  none;"
             +"padding-left: 0px;"
-            +"padding-right: 0px;";
+            +"padding-right: 0px;"
+            +"display: flex;"
+            +"align-items: center;"
+            +"justify-content: center;";
+            
         
         
         if (document.getElementsByClassName("cke_button__expand")[0]!=undefined){
@@ -92,10 +94,10 @@ function updateCellRange(){
     
     needsSaving(htmlOutput);
     try{
-    google.script.run
+      google.script.run
         .withSuccessHandler(
             function(data, element) {
-            if (data){
+            if (data) {
                 var splitter = data.split("!@!@");
                 var key = splitter[0];
                 var content = splitter[1];
@@ -116,6 +118,7 @@ function updateCellRange(){
                    
                    //https://stackoverflow.com/questions/15674496/ckeditor-smooth-setdata
                     CKEDITOR.instances.editor1.editable().setHtml( content);
+                    console.log('set content')
                     //CKEDITOR.instances.editor1.setData(content);
                     document.getElementById("oldnote").innerHTML = content;
                     document.getElementById("note").innerHTML = content;
@@ -153,6 +156,7 @@ function updateCellRange(){
 $(function() {
 // Start polling for updates        
     poll();
+    window.top.document.getElementsByClassName("script-application-sidebar")[0].style.width='500px';
 });
 
 /**
@@ -165,7 +169,7 @@ $(function() {
  *                            Default is 2s (2000ms)
  */
 function poll(interval) {
-    interval = interval || 500;//250; mfg_tag
+    interval = interval || 2000;//250; mfg_tag
     setTimeout(function() {
         updateCellRange();
     }, interval);

@@ -25,7 +25,7 @@ function showExpandedSideNotes() {
 
 function showExpandedDialog(dbSheet) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var html = HtmlService.createTemplateFromFile('DialogEditor'); 
+  var html = HtmlService.createTemplateFromFile('dialog-editor').setWidth(400); 
   var dbSheetName = dbSheet.getSheetName();
   var combined = getNoteForActiveRange(dbSheetName);
   var splitter = combined.split("!@!@");
@@ -52,7 +52,7 @@ function showExpandedDialog(dbSheet) {
 
 function showSidebar(dbSheet) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var html = HtmlService.createTemplateFromFile('Editor')
+  var html = HtmlService.createTemplateFromFile('editor');
   var dbSheetName = dbSheet.getSheetName();
   var combined = getNoteForActiveRange(dbSheetName);
   console.log({combined});
@@ -71,7 +71,7 @@ function showSidebar(dbSheet) {
   html.error = false;
   
     SpreadsheetApp.getUi()
-      .showSidebar(html.evaluate().setTitle("Cell Notes"));
+      .showSidebar(html.evaluate().setWidth(1000).setTitle("Cell Notes"));
   
 }
 
