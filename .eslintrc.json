@@ -1,11 +1,13 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "googleappsscript/googleappsscript": true
     },
     "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended"
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:prettier/recommended"
     ],
     "globals": {
         "Atomics": "readonly",
@@ -14,27 +16,35 @@
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": 2018,
-        "sourceType": "module"
+        "sourceType": "script"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "googleappsscript"
     ],
     "rules": {
         "indent": [
-            "error",
+            "warn",
             4
         ],
         "linebreak-style": [
-            "error",
+            "warn",
             "unix"
         ],
         "quotes": [
-            "error",
+            "warn",
             "single"
         ],
         "semi": [
-            "error",
+            "warn",
             "always"
-        ]
+        ],
+        "no-unused-vars": ["warn", {"vars": "local", "args": "after-used"}],
+		"prettier/prettier": ["warn", {
+			"singleQuote": true,
+			"useTabs": false,
+            "bracketSpacing": false,
+            "tabWidth": 4
+		}]
     }
 }
