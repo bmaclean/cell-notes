@@ -1,3 +1,3 @@
 function onSelectionChange(e) {
-    console.log('selection changed')
+    console.log('selection changed');
 }
