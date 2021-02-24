@@ -1,41 +1,59 @@
-
-
-function addNewSideNote(range,dbSheet,sidenote) {
-    var sidenote = saveSideNote(dbSheet,sidenote);
-    addNoteWithKeyToRange(sidenote.key,range);
+function addNewSideNote(
+    range: GoogleAppsScript.Spreadsheet.Range,
+    dbSheet: GoogleAppsScript.Spreadsheet.Sheet,
+    sidenote: SideNote
+) {
+    const newSidenote = saveSideNote(dbSheet, sidenote);
+    addNoteWithKeyToRange(newSidenote.key, range);
     //showAlert("just saved cell:",range.getA1Notation() + "in key " + sidenote.key)
-    return sidenote;
+    return newSidenote;
 }
 
-function deleteSideNote(dbSheet,range){
+function deleteSideNote(
+    dbSheet: GoogleAppsScript.Spreadsheet.Sheet,
+    range: GoogleAppsScript.Spreadsheet.Range
+) {
     const key = removeNoteFromRange(range);
-    deleteSideNoteWithKey(dbSheet,key);
-    return key;
+    if (!key) {
+        throw 'There was a problem deleting your cell note.';
+    } else {
+        deleteSideNoteWithKey(dbSheet, key);
+        return key;
+    }
 }
 
-function promptNoImageOnSidebar(){
+function promptNoImageOnSidebar() {
     const title = 'Inserting images';
-    const message = 'To insert images, switch to the full-size editor. Do you want to open it now?';
-    const response = showYesNoDialog(title,message);
-    if (response == true){
+    const message =
+        'To insert images, switch to the full-size editor. Do you want to open it now?';
+    const response = showYesNoDialog(title, message);
+    if (response == true) {
         showExpandedSideNotes();
     }
 }
 
-function setAlive(){
+function setAlive() {
     const lastSeenDate = new Date();
-    PropertiesService.getUserProperties().setProperty('CellNotesKeepAlive', lastSeenDate.toISOString());
+    PropertiesService.getUserProperties().setProperty(
+        'CellNotesKeepAlive',
+        lastSeenDate.toISOString()
+    );
 }
 
-function getAlive(){
-    const lastSeenDate = new Date(PropertiesService.getUserProperties().getProperty('CellNotesKeepAlive'));
-    const now = new Date();
-    const timeDiff = now.getTime()-lastSeenDate.getTime();
-    const isAlive = (timeDiff)<6000;
-    if (isAlive){
-        return 'true';
+function getAlive() {
+    const keepAliveValue = PropertiesService.getUserProperties().getProperty(
+        'CellNotesKeepAlive'
+    );
+    if (!keepAliveValue) {
+        return 'false';
     }
-    else{
+    const lastSeenDate = new Date(keepAliveValue);
+    const now = new Date();
+    const timeDiff = now.getTime() - lastSeenDate.getTime();
+    const isAlive = timeDiff < 6000;
+    if (isAlive) {
+        return 'true';
+    } else {
         return 'false';
     }
 }

@@ -1,7 +1,15 @@
+interface SideNote {}
 
-function SideNote(key, user, date, content){
-    this.key = key;
-    this.user = user;
-    this.date = date;
-    this.content = content;  
+class SideNote {
+    key: number;
+    user: string;
+    date: Date;
+    content: string;
+
+    constructor(key: number, user: string, date: Date, content: string) {
+        this.key = key;
+        this.user = user;
+        this.date = date;
+        this.content = content;
+    }
 }

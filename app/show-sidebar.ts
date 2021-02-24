@@ -1,12 +1,10 @@
-
-
 function showSideNoteSidebar() {
     //Check if SideNotes database is there already
     const sheet = getSideNotesSheet();
-  
+
     //Anything else that we want to do in SideNotes requires the database to exist.
     //Don't even open the SideNotes sidebar if there isn't one.
-    if (sheet != null){
+    if (sheet != null) {
         showSidebar(sheet);
     }
 }
@@ -14,18 +12,19 @@ function showSideNoteSidebar() {
 function showExpandedSideNotes() {
     //Check if SideNotes database is there already
     const sheet = getSideNotesSheet();
-  
+
     //Anything else that we want to do in SideNotes requires the database to exist.
     //Don't even open the SideNotes sidebar if there isn't one.
-    if (sheet != null){
+    if (sheet != null) {
         showExpandedDialog(sheet);
     }
 }
 
-
-function showExpandedDialog(dbSheet) {
+function showExpandedDialog(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const html = HtmlService.createTemplateFromFile('dialog-editor').setWidth(400); 
+    const html = HtmlService.createTemplateFromFile('dialog-editor').setWidth(
+        400
+    );
     const dbSheetName = dbSheet.getSheetName();
     const combined = getNoteForActiveRange(dbSheetName);
     const splitter = combined.split('!@!@');
@@ -43,14 +42,12 @@ function showExpandedDialog(dbSheet) {
     html.error = false;
     const result = html.evaluate();
     result.setWidth(800);
-    result.setHeight(600);  
+    result.setHeight(600);
     result.setTitle('Cell Notes');
-    SpreadsheetApp.getUi() 
-        .showModalDialog(result,'Cell Notes');
-  
+    SpreadsheetApp.getUi().showModalDialog(result, 'Cell Notes');
 }
 
-function showSidebar(dbSheet) {
+function showSidebar(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const html = HtmlService.createTemplateFromFile('editor');
     const dbSheetName = dbSheet.getSheetName();
@@ -69,69 +66,76 @@ function showSidebar(dbSheet) {
     html.note = content;
     html.oldnote = content;
     html.error = false;
-  
-    SpreadsheetApp.getUi()
-        .showSidebar(html.evaluate().setWidth(1000).setTitle('Cell Notes'));
-  
+
+    SpreadsheetApp.getUi().showSidebar(
+        html.evaluate().setWidth(1000).setTitle('Cell Notes')
+    );
 }
 
-function include(File) {
-    return HtmlService.createHtmlOutputFromFile(File).getContent();
+function include(file: string) {
+    return HtmlService.createHtmlOutputFromFile(file).getContent();
 }
 
-function getTextInput(key,sheetName,rangeA1,html,dbSheetName){
+function getTextInput(
+    key: number,
+    sheetName: string,
+    rangeA1: string,
+    html: string,
+    dbSheetName: string
+) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const range = ss.getSheetByName(sheetName).getRange(rangeA1);
+    const range = ss.getSheetByName(sheetName)?.getRange(rangeA1);
     const dbSheet = ss.getSheetByName(dbSheetName);
-    const sidenote = new SideNote(key*1,getUser(),new Date(),html);
-    addNewSideNote(range,dbSheet,sidenote);
+    const sidenote = new SideNote(key * 1, getUser(), new Date(), html);
+    addNewSideNote(range, dbSheet, sidenote);
     return html;
 }
 
-function deleteSelectedRangeSN(sheetName,rangeA1,dbSheetName){
-    
+function deleteSelectedRangeSN(
+    sheetName: string,
+    rangeA1: string,
+    dbSheetName: string
+) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const range = ss.getSheetByName(sheetName).getRange(rangeA1);
+    const range = ss?.getSheetByName(sheetName)?.getRange(rangeA1);
     const dbSheet = ss.getSheetByName(dbSheetName);
-    deleteSideNote(dbSheet,range);
+    deleteSideNote(dbSheet, range);
 }
 
-function exportSelected(){
+function exportSelected() {
     //Check if SideNotes database is there already
     const sheet = getSideNotesSheet();
-  
+
     //Anything else that we want to do in SideNotes requires the database to exist.
     //Don't even open the Export if there isn't one.
-    if (sheet != null){
+    if (sheet != null) {
         const range = sheet.getActiveRange();
-        const html = exportNotesInRange(sheet,range);
+        const html = exportNotesInRange(sheet, range);
         const htmlOutput = HtmlService.createHtmlOutput(html);
         htmlOutput.setWidth(800);
-        htmlOutput.setHeight(600);  
+        htmlOutput.setHeight(600);
         htmlOutput.setTitle('Cell Notes export');
-        SpreadsheetApp.getUi() 
-            .showModalDialog(htmlOutput,'Cell Notes export');
+        SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'Cell Notes export');
     }
 }
 
-function exportAllMenu(){
+function exportAllMenu() {
     //Check if SideNotes database is there already
     const sheet = getSideNotesSheet();
-  
+
     //Anything else that we want to do in SideNotes requires the database to exist.
     //Don't even open the Export if there isn't one.
-    if (sheet != null){
+    if (sheet != null) {
         const html = exportAll(sheet);
         const htmlOutput = HtmlService.createHtmlOutput(html);
         htmlOutput.setWidth(800);
-        htmlOutput.setHeight(600);  
+        htmlOutput.setHeight(600);
         htmlOutput.setTitle('Cell Notes export');
-        SpreadsheetApp.getUi() 
-            .showModalDialog(htmlOutput,'Cell Notes export');
+        SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'Cell Notes export');
     }
 }
 
-function getSideNotesSheet(){
+function getSideNotesSheet() {
     //Check if SideNotes database is there already
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = checkSidenoteDatabase(ss);
