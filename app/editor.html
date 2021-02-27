@@ -24,7 +24,24 @@
   <textarea name="editor1" style="height:100%"></textarea>
   <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
   <style>
-     
+     .cke_top {
+        padding: 0;
+     }
+     .cke_toolbar {
+        width: 100%;
+        float: none;
+     }
+     .cke_toolgroup {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        float: none;
+        margin: 0;
+        padding: 4px;
+     }
+     .cke_button_icon {
+        
+     }
   </style>
 
   <script>
@@ -36,12 +53,7 @@
 			toolbarGroups: [
                 {"name":"sidenotes"},
                 '/',
-				{"name":"basicstyles","groups":["basicstyles"]},
-				{"name":"paragraph","groups":["list","indent"]},
-                {"name":"links","groups":["links"]},
-
-      
-
+				{"name":"basicstyles","groups":["basicstyles","list","indent","links"]},
 			],
 			// Remove the redundant buttons from toolbar groups defined above.
 			removeButtons: 'Strike,Blockquote,Font,FontSize,Anchor,Styles,Format,Specialchar,Maximize,Save,NewPage,Preview,Print,Flash,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Underline,Superscript,Subscript,ShowBlocks,Image,Table',
@@ -164,11 +176,11 @@
   });
   
 
-  CKEDITOR.instances.editor1.ui.addButton('Inform', { // add new button and bind our command
-     label: "Cell Notes info",
-     command: 'inform',
-     toolbar: 'sidenotes'
-  });
+//   CKEDITOR.instances.editor1.ui.addButton('Inform', { // add new button and bind our command
+//      label: "Cell Notes info",
+//      command: 'inform',
+//      toolbar: 'sidenotes'
+//   });
   
   /*
   CKEDITOR.instances.editor1.addCommand("sideNotesHelp", { // create named command
