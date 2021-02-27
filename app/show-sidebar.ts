@@ -10,7 +10,7 @@ function showSideNoteSidebar() {
 }
 
 function showExpandedSideNotes() {
-    //Check if SideNotes database is there already
+    // Check if SideNotes database is there already
     const sheet = getSideNotesSheet();
 
     //Anything else that we want to do in SideNotes requires the database to exist.
@@ -22,9 +22,7 @@ function showExpandedSideNotes() {
 
 function showExpandedDialog(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const html = HtmlService.createTemplateFromFile('dialog-editor').setWidth(
-        400
-    );
+    const html = HtmlService.createTemplateFromFile('dialog-editor');
     const dbSheetName = dbSheet.getSheetName();
     const combined = getNoteForActiveRange(dbSheetName);
     const splitter = combined.split('!@!@');
@@ -67,9 +65,7 @@ function showSidebar(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
     html.oldnote = content;
     html.error = false;
 
-    SpreadsheetApp.getUi().showSidebar(
-        html.evaluate().setWidth(1000).setTitle('Cell Notes')
-    );
+    SpreadsheetApp.getUi().showSidebar(html.evaluate().setTitle('Cell Notes'));
 }
 
 function include(file: string) {
