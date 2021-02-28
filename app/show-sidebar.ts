@@ -50,7 +50,6 @@ function showSidebar(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
     const html = HtmlService.createTemplateFromFile('editor');
     const dbSheetName = dbSheet.getSheetName();
     const combined = getNoteForActiveRange(dbSheetName);
-    console.log({combined});
     const splitter = combined.split('!@!@');
     const key = splitter[0];
     const content = splitter[1];

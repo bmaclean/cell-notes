@@ -61,7 +61,7 @@ function writeSideNoteToRowWithIndex(
     sidenote: SideNote
 ) {
     //get range - may be a new range or an existing range
-    const rowRange = sheet.getRange(index, 1, 1, noCols);
+    const rowRange = sheet.getRange(index, 1, 1, numCols);
 
     //prepare data as a row
     const sidenoteData = [];

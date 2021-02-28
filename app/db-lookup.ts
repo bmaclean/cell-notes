@@ -4,7 +4,7 @@ const DATE = 'Date';
 const CONTENT = 'Content';
 const firstRow = 3;
 const firstCol = 1;
-const noCols = 4;
+const numCols = 4;
 const contentCol = 3;
 
 function doesKeyExistFast(
@@ -23,24 +23,17 @@ function getNoteWithKey(
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     key: number
 ) {
-    //row data
-    if (key != null) {
-        if (key > -1) {
-            const rowData = sheet.getRange(key, 1, 1, 4).getValues();
+    if (key !== null && key > -1) {
+        const [[rowKey, user, date, rowContent]] = sheet
+            .getRange(key, 1, 1, 4)
+            .getValues();
 
-            //convert into SideNote object.
-            //mfg_tag assuming the order of the headers will stay the same for now
-            if (rowData != undefined) {
-                const content =
-                    rowData[0][0] == 'DELETED' ? '' : rowData[0][contentCol];
-                const rowValuesForKey = new SideNote(
-                    key,
-                    rowData[0][1],
-                    rowData[0][2],
-                    content
-                );
-                return rowValuesForKey;
-            }
+        // convert into SideNote object.
+        // mfg_tag assuming the order of the headers will stay the same for now
+        if (rowKey != undefined) {
+            const content = rowKey == 'DELETED' ? '' : rowContent;
+            const sidenote = new SideNote(key, user, date, content);
+            return sidenote;
         }
     }
     return null;
@@ -54,7 +47,7 @@ function getRowRangeForNoteWithKey(
     const rowIndex = getRowIndexForNoteWithKey(key);
     if (rowIndex != null) {
         //now get the row range
-        const range = sheet.getRange(rowIndex, 1, 1, noCols);
+        const range = sheet.getRange(rowIndex, 1, 1, numCols);
         return range;
     }
     return null;
@@ -79,7 +72,7 @@ function getLookupRange(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
         firstRow,
         firstCol,
         lastRow - (firstRow - 1),
-        noCols
+        numCols
     );
     return range;
 }
