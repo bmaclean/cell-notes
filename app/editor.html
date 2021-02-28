@@ -2,47 +2,48 @@
 <html style="height:100%">
   <head>
       <base target="_top">
+      <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css" />
+      <style>
+         /* add some specificity to custom styles */
+         .cke_inner > .cke_top {
+            padding: 0;
+         }
+         .cke_toolbox > .cke_toolbar {
+            width: 100%;
+            float: none;
+         }
+         .cke_toolbar > .cke_toolgroup {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            float: none;
+            margin: 0;
+            padding: 4px;
+            max-width: 100%;
+         }
+      </style>
   </head>
   <body style="height:100%">
-  <p hidden id="key"><?= key ?></p>
-  <p hidden id="sheetName"><?= sheetName ?></p>
-  <p hidden id="rangeA1"><?= rangeA1 ?></p>
-  <p hidden id="dbSheet"><?= dbSheet ?></p>
-  <p hidden id="spreadsheetId"><?= spreadsheetId ?></p>
-  <p hidden id="error"><?= error ?></p>
-  <p hidden id="note"><?= note ?></p>  
-  <p hidden id="oldnote"><?= oldnote ?></p>  
-  <p hidden id="isFirst">true</p>  
-  <p hidden id="pollTimes">0</p>  
-  <p hidden id="shouldPoll">false</p>    
-  <p hidden id="isSidebar">true</p>    
-  <p hidden id="lastPoll">0</p>  
-  <p hidden id="pollTimesSaving">0</p>  
+   <!-- TODO: move all this into documentProperties google API -->
+   <p hidden id="key"><?= key ?></p>
+   <p hidden id="sheetName"><?= sheetName ?></p>
+   <p hidden id="rangeA1"><?= rangeA1 ?></p>
+   <p hidden id="dbSheet"><?= dbSheet ?></p>
+   <p hidden id="spreadsheetId"><?= spreadsheetId ?></p>
+   <p hidden id="error"><?= error ?></p>
+   <p hidden id="note"><?= note ?></p>  
+   <p hidden id="oldnote"><?= oldnote ?></p>  
+   <p hidden id="isFirst">true</p>  
+   <p hidden id="pollTimes">0</p>  
+   <p hidden id="shouldPoll">false</p>    
+   <p hidden id="isSidebar">true</p>    
+   <p hidden id="lastPoll">0</p>  
+   <p hidden id="pollTimesSaving">0</p>  
   
   <?!= include('javascript'); ?>
     
-  <textarea name="editor1" style="height:100%"></textarea>
-  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-  <style>
-     .cke_top {
-        padding: 0;
-     }
-     .cke_toolbar {
-        width: 100%;
-        float: none;
-     }
-     .cke_toolgroup {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        float: none;
-        margin: 0;
-        padding: 4px;
-     }
-     .cke_button_icon {
-        
-     }
-  </style>
+  <textarea name="editor1" style="height:100%">
+  </textarea>
 
   <script>
   
@@ -97,11 +98,8 @@
     CKEDITOR.instances.editor1.ui.addButton('Expand', { // add new button and bind our command
      label: "ExpandButton",
      command: 'fullsize',
-     toolbar: 'sidenotes',
+     toolbar: 'sidenotes'
   });
-  
-
-  
  
   /*
   CKEDITOR.instances.editor1.ui.addButton('Full size editor', { // add new button and bind our command
