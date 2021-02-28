@@ -1,364 +1,41 @@
-<script src="https://cdn.ckeditor.com/4.7.3/full-all/ckeditor.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.6.1/firebase.js"></script>
+<script src="//cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
 <script>
-// Prevent forms from submitting. 
-// mfg_tag this may  be useful if we want to stop users form saving if the html is corrupted or sthg
-/*
-function preventFormSubmit() {
+    $(function() {
+    // Start polling for updates        
+        // poll();
+        var quill = new Quill('#editor', {
+            modules: {
+                toolbar: '#editor-toolbar'
+                // toolbar: [
+                //     [{ 'header': 1 }, { 'header': 2 }, 'bold', 'italic', 'underline'],
+                //     [{ 'color': [] }, { 'background': [] }, {'script': 'sub'}, { 'script': 'super' }, 'image', 'code-block'],
+                // ]
+            },
+            placeholder: 'Write some notes...',
+            theme: 'snow'
+        })
+    });
 
-    var forms = document.querySelectorAll('form');
-    for (var i = 0; i < forms.length; i++) {
-        forms[i].addEventListener('submit', function(event) {
-            event.preventDefault();
-        });
-    }
-    
-}
-window.addEventListener('load', preventFormSubmit);
-*/
-function handleFormSubmit() {
-    displayMessage("Saving...");
-    var htmlOutput = CKEDITOR.instances.editor1.getData();
-    var key = document.getElementById("key").innerHTML;
-    var sheetname = document.getElementById("sheetName").innerHTML;
-    var range = document.getElementById("rangeA1").innerHTML;
-    var dbsheet = document.getElementById("dbSheet").innerHTML;
-    if (htmlOutput.length<50000){
-        google.script.run.withSuccessHandler(displaySavedMessage).getTextInput(key,sheetname,range,htmlOutput,dbsheet);
-    }
-    else{
-        displayMessage("Can't save. Cell note is too long!")
-    }
-
-}
-
-function updateCellRange() {
-    var dbsheet = document.getElementById("dbSheet").innerHTML;
-    document.getElementById("note").innerHTML = CKEDITOR.instances.editor1.getData();
-    var htmlOutput = document.getElementById("note").innerHTML;
-    var isFirst = document.getElementById("isFirst").innerHTML == "true";
-    if (isFirst){
-        document.getElementById("oldnote").innerHTML = document.getElementById("note").innerHTML;
-        document.getElementById("isFirst").innerHTML = "false";
-        if (document.getElementsByClassName("cke_toolbar_break")[0]!=undefined){
-          document.getElementsByClassName("cke_toolbar_break")[0].style.borderBottom="1px solid lightgray";
-        }
-
-        var css = "background: -moz-linear-gradient(top, #4d90fe, #4787ed);"
-            +"background: -ms-linear-gradient(top, #4d90fe, #4787ed);"
-            +"background: -o-linear-gradient(top, #4d90fe, #4787ed);"
-            +"background: -webkit-linear-gradient(top, #4d90fe, #4787ed);"
-            +"background: linear-gradient(top, #4d90fe, #4787ed);"
-            +"border: 1px solid #3079ed;color: #fff;"
-            +"border: 1px solid #dcdcdc;"
-            +"-moz-border-radius: 2px;"
-            +"-webkit-border-radius: 2px;"
-            +"border-radius: 6px;"
-            +"-moz-box-shadow: none;"
-            +"-webkit-box-shadow: none;"
-            +"box-shadow: none;"
-            +"cursor: default;"
-            +"font-family: arial, sans-serif;"
-            +"font-size: 11px;"
-            +"font-weight: bold;"
-            +"line-height: 27px;"
-            +"margin: 0;"
-            +"min-width: 72px;"
-            +"outline: 0;"
-            +"padding: 8px;"
-            +"text-align: center;"
-            +"white-space: nowrap;"
-            +"text-decoration:  none;"
-            +"padding-left: 0px;"
-            +"padding-right: 0px;"
-            +"display: flex;"
-            +"align-items: center;"
-            +"justify-content: center;";
-            
+    /**
+     * Poll a server-side function at the given interval, to have
+     * results passed to a successHandler callback. We may want to
+     * use this poll function to watch for concurrent remote edits.
+     *
+     * https://stackoverflow.com/a/24773178/1677912
+     *
+     * @param {Number} interval   (optional) Time in ms between polls.
+     *                            Default is 2s (2000ms)
+     */
+    function poll(interval) {
+        interval = interval || 2000;//250; mfg_tag
+        setTimeout(function() {
+        }, interval);
         
-        
-        if (document.getElementsByClassName("cke_button__expand")[0] != undefined){
-          document.getElementsByClassName("cke_button__expand")[0].text = "Expand";  
-          document.getElementsByClassName("cke_button__expand")[0].style = css;
-        }
-        else if (document.getElementsByClassName("cke_button__collapse")[0] != undefined){
-          document.getElementsByClassName("cke_button__collapse")[0].text = "Collapse"
-          document.getElementsByClassName("cke_button__collapse")[0].style = css;
-        }
-    }
-    //document.getElementsByClassName("cke_button__fullSize")[0].style = ' background: #f5f5f5; ';//background: -moz-linear-gradient(top, #f5f5f5, #f1f1f1);  background: -ms-linear-gradient(top, #f5f5f5, #f1f1f1);  background: -o-linear-gradient(top, #f5f5f5, #f1f1f1);  background: -webkit-linear-gradient(top, #f5f5f5, #f1f1f1);  background: linear-gradient(top, #f5f5f5, #f1f1f1);';
-    
-    needsSaving(htmlOutput);
-    try{
-      google.script.run
-        .withSuccessHandler(
-            function(data, element) {
-            if (data) {
-                var splitter = data.split("!@!@");
-                var key = splitter[0];
-                var content = splitter[1];
-                var sheetName = splitter[2];
-                var rangeA1formatted = splitter[3];
-                var error = splitter[4];
-                var oldError = document.getElementById("error").innerHTML;
-                
-                displayError(error=="true",oldError!=error);
-                document.getElementById("error").innerHTML = error;
-                var pollTimes = parseInt(document.getElementById("pollTimes").innerHTML);
-                var shouldPoll = document.getElementById("shouldPoll").innerHTML == "true"
-                if (document.getElementById("rangeA1").innerHTML != rangeA1formatted || (shouldPoll && pollTimes>10)){
-                //here we will need to save prior to storing new values
-                    document.getElementById("key").innerHTML = key;
-                    document.getElementById("sheetName").innerHTML = sheetName;
-                    document.getElementById("rangeA1").innerHTML = rangeA1formatted;
-                   
-                   //https://stackoverflow.com/questions/15674496/ckeditor-smooth-setdata
-                    CKEDITOR.instances.editor1.editable().setHtml( content);
-                    console.log('set content')
-                    //CKEDITOR.instances.editor1.setData(content);
-                    document.getElementById("oldnote").innerHTML = content;
-                    document.getElementById("note").innerHTML = content;
-                    document.getElementById("isFirst").innerHTML = "true";
-                    document.getElementById("pollTimes").innerHTML = "0";
-                    displayMessage("");
-                    
-                    
-                }
-                
-
-            }
-            else{
-                //CKEDITOR.instances.editor1.setData("");
-            }
-
-            })
-        .withFailureHandler(
-            function(msg, element) {
-                // code to execute if data was not gotten ok
-            })
-        .getNoteForActiveRange(dbsheet);
-    }
-    catch(err) {
-    }
-    
-    poll();
-
-}
-
-/// HTML polling
-/**
- * Run initializations on sidebar load.
- */
-$(function() {
-// Start polling for updates        
-    poll();
-    window.top.document.getElementsByClassName("script-application-sidebar")[0].style.width='500px';
-});
-
-/**
- * Poll a server-side function at the given interval, to have
- * results passed to a successHandler callback.
- *
- * https://stackoverflow.com/a/24773178/1677912
- *
- * @param {Number} interval   (optional) Time in ms between polls.
- *                            Default is 2s (2000ms)
- */
-function poll(interval) {
-    interval = interval || 2000;//250; mfg_tag
-    setTimeout(function() {
-        updateCellRange();
-    }, interval);
-    
-    setTimeout(function() {
-        checkAlive();
-        setAlive();
-    }, 5000);
-};
-
-function deleteSideNote(){
-    
-    google.script.run.withSuccessHandler(
-    function(data) {
-       if (data == "true"){
-           deleteSideNoteYes();
-       }
-    })
-    .withFailureHandler(
-    function(msg, element) {
-        google.script.run.showAlert("Couldn't delete cell note",msg);
-    })
-    .showDeleteCellDialog();
-    
-}
-
-function deleteSideNoteYes(){
-    displayMessage("Deleting cell note");
-    var sheetName = document.getElementById("sheetName").innerHTML;
-    var rangeA1 = document.getElementById("rangeA1").innerHTML;
-    var dbSheetName = document.getElementById("dbSheet").innerHTML;
-// remove the text otherwise we will overwrite it again!
-    CKEDITOR.instances.editor1.setData("");
-    google.script.run.deleteSelectedRangeSN(sheetName,rangeA1,dbSheetName);
-        google.script.run
-        .withSuccessHandler(
-            function() {
-                displayMessage("Cell note deleted");
-         })
-        .withFailureHandler(
-            function(msg, element) {
-                google.script.run.showAlert("Couldn't delete cell note",msg);
-         })
-        .deleteSelectedRangeSN(sheetName,rangeA1,dbSheetName);
-}
-
-function fullSize(){
-    google.script.run
-        .withSuccessHandler(
-            function() {
-            document.getElementById("shouldPoll").innerHTML = "true";
-                //google.script.host.close();
-         })
-        .withFailureHandler(
-            function(msg, element) {
-                google.script.run.showAlert("Couldn't open full size editor",msg);
-         })
-        .showExpandedSideNotes();
-    
-}
-
-function minimize(){
-    google.script.run
-        .withSuccessHandler(
-            function() {
-                google.script.host.close();
-         })
-        .withFailureHandler(
-            function(msg, element) {
-                google.script.run.showAlert("Couldn't open sidebar editor",msg);
-         })
-        .showSideNoteSidebar();
-    
-}
-
-function setAlive(){
-    var isSidebar = document.getElementById("isSidebar").innerHTML=="true";
-    if (!isSidebar){
-       google.script.run.setAlive();
-    }
-}
-
-function checkAlive(){
-    var isSidebar = document.getElementById("isSidebar").innerHTML=="true";
-    if (isSidebar){
-    google.script.run
-        .withSuccessHandler(
-            function(result) {
-            //document.getElementById("lastPoll").innerHTML = result;
-            if (result=="false"){
-                document.getElementById("shouldPoll").innerHTML = "false";
-            }
-            else{
-                document.getElementById("shouldPoll").innerHTML = "true";
-            }
-         })
-        .withFailureHandler(
-            function(msg, element) {
-                //google.script.run.showAlert("Couldn't open sidebar editor",msg);
-         })
-        .getAlive();
-     }   
-}
-
-function displayError(isError,needsChange){
-    if (needsChange){
-        if (isError){ 
-            document.getElementsByClassName("cke_button__inform")[0].text = "To view a cell note, select a single cell";
-            CKEDITOR.instances.editor1.setReadOnly( true );
-            //https://ckeditor.com/old/forums/Support/HOWTO-disable-toolbar-buttons
-            CKEDITOR.instances.editor1.getCommand( 'exportAll' ).enable();
-            CKEDITOR.instances.editor1.getCommand( 'exportSelected' ).enable();
-
-        }
-        else{
-            document.getElementsByClassName("cke_button__inform")[0].text = "";
-            CKEDITOR.instances.editor1.setReadOnly( false );
-        }
-    }
-    
-}
-
-function displayMessage(message){
-
-    var pollTimes = parseInt(document.getElementById("pollTimesSaving").innerHTML);
-    var num = pollTimes+1;
-        
-    if (document.getElementsByClassName("cke_button__inform")[0].text!=message){
-      if (message == "Saved" || num>10){
-        document.getElementsByClassName("cke_button__inform")[0].text = message;
-        document.getElementsByClassName("cke_button__inform")[0].style.color = "gray";
-        document.getElementsByClassName("cke_button__inform")[0].style.fontSize = "small";
-      
-        num = 0;
-      }
-    }
-    document.getElementById("pollTimesSaving").innerHTML = num.toString();
-}
-
-function displaySavedMessage(html){
-    if (html){
-    
-        document.getElementById("note").innerHTML = html;
-        document.getElementById("oldnote").innerHTML = html;
-        displayMessage("Saved");
-    }
-    else{
-        displayMessage("Unsaved changes");
-    }
-}
-
-function needsSaving(htmlOutput){
-    var check = false;
-    
-    var retrievedOutput = document.getElementById("oldnote").innerHTML;
-    
-    var shouldPoll = document.getElementById("shouldPoll").innerHTML== "true";
-    
-    if (shouldPoll){
-        var pollTimes = parseInt(document.getElementById("pollTimes").innerHTML);
-        var num = pollTimes+1;
-        document.getElementById("pollTimes").innerHTML = num.toString();
-        
-    }
-    else if (htmlOutput && (htmlOutput!=retrievedOutput)){
-        document.getElementById("pollTimes").innerHTML = "0";
-        handleFormSubmit();
-        check = true;
-        //setAlive();
-    }
-    //checkAlive();
-
-    var severalSelected =  document.getElementById("error").innerHTML;
-    if (htmlOutput==""){
-        if (severalSelected!="true"){
-            CKEDITOR.instances.editor1.getCommand( 'exportSelected' ).disable();
-        }
-        CKEDITOR.instances.editor1.getCommand( 'deleteSideNote' ).disable();
-        
-    }
-    else{
-        
-        if (severalSelected != "true"){
-            CKEDITOR.instances.editor1.getCommand( 'deleteSideNote' ).enable();
-        }
-        CKEDITOR.instances.editor1.getCommand( 'exportSelected' ).enable();
-    }
-
-    return check;
-}
-
-
+        setTimeout(function() {
+        }, 5000);
+    };
 </script>
 
