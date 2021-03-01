@@ -3,7 +3,7 @@
   <head>
       <base target="_top">
       <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-      <?!= include('javascript'); ?>
+      <?!= include('client-js'); ?>
 
       <style>
          #editor-toolbar .custom-button {
@@ -32,7 +32,7 @@
       <p hidden id="dbSheet"><?= dbSheet ?></p>
       <p hidden id="spreadsheetId"><?= spreadsheetId ?></p>
       <p hidden id="error"><?= error ?></p>
-      <p hidden id="note"><?= note ?></p>
+      <p hidden id="current-note"><?= note ?></p>
       <p hidden id="oldnote"><?= oldnote ?></p>
       <p hidden id="isFirst">true</p>
       <p hidden id="isSidebar">true</p>
