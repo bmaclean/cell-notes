@@ -2,7 +2,8 @@
     "env": {
         "browser": true,
         "es6": true,
-        "googleappsscript/googleappsscript": true
+        "googleappsscript/googleappsscript": true,
+        "jquery": true
     },
     "extends": [
         "eslint:recommended",
@@ -11,7 +12,9 @@
     ],
     "globals": {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+        "SharedArrayBuffer": "readonly",
+        "Quill": "readonly",
+        "google": "readonly"
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -20,8 +23,12 @@
     },
     "plugins": [
         "@typescript-eslint",
-        "googleappsscript"
+        "googleappsscript",
+        "html"
     ],
+    "settings": {
+        "html/indent": "+2"
+    },
     "rules": {
         "indent": [
             "warn",
