@@ -1,3 +1,5 @@
+![Cell Notes Logo](./assets/logo.png)
+
 # Cell Notes
 
 ## Installation and Setup
