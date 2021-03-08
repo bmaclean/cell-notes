@@ -1,5 +1,5 @@
-const SNSHEETNAME = 'Cell Notes Store';
-const SNDBSHEETID = 'SidenotesDatabaseSheetID';
+const SNSHEETNAME = 'Cell Notes Store - Beta';
+const SNDBSHEETID = 'SidenotesDatabaseSheetID--beta';
 
 function checkSidenoteDatabase(ss: GoogleAppsScript.Spreadsheet.Spreadsheet) {
     // If sheet with name found, make sure it's hidden (?)
