@@ -4,3 +4,5 @@ node_modules/
 .clasprc.json
 creds.json
 .DS_STORE
+# local vscode workspace settings
+settings.json
