@@ -8,11 +8,10 @@ Install [`clasp`](https://github.com/google/clasp)
 
 ### Using the Makefile
 
-To initialize the project:
+To initialize the project and open your App Script:
 
 `make cell-notes DEVELOPMENT_SCRIPT_ID=[my-script-id]`
 
-To open your App Script and watch local files for changes:
+To watch local files and push changes to remote project:
 
 `make dev`
-
