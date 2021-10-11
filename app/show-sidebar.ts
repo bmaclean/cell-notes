@@ -21,24 +21,8 @@ function showExpandedSideNotes() {
 }
 
 function showExpandedDialog(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const html = HtmlService.createTemplateFromFile('dialog-editor');
-    const dbSheetName = dbSheet.getSheetName();
-    const combined = getNoteForActiveRange(dbSheetName);
-    const splitter = combined.split('!@!@');
-    const key = splitter[0];
-    const content = splitter[1];
-    const sheetName = splitter[2];
-    const rangeA1formatted = splitter[3];
-    html.rangeA1 = rangeA1formatted;
-    html.sheetName = sheetName;
-    html.key = key;
-    html.dbSheet = dbSheet.getSheetName();
-    html.spreadsheetId = ss.getId();
-    html.note = content;
-    html.oldnote = content;
-    html.error = false;
-    const result = html.evaluate();
+    const result = initializeView(dbSheet, html);
     result.setWidth(800);
     result.setHeight(600);
     result.setTitle('Cell Notes');
@@ -46,23 +30,8 @@ function showExpandedDialog(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
 }
 
 function showSidebar(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const html = HtmlService.createTemplateFromFile('editor');
-    const dbSheetName = dbSheet.getSheetName();
-    const combined = getNoteForActiveRange(dbSheetName);
-    const splitter = combined.split('!@!@');
-    const key = splitter[0];
-    const content = splitter[1];
-    const sheetName = splitter[2];
-    const rangeA1formatted = splitter[3];
-    html.rangeA1 = rangeA1formatted;
-    html.sheetName = sheetName;
-    html.key = key;
-    html.dbSheet = dbSheet.getSheetName();
-    html.spreadsheetId = ss.getId();
-    html.note = content;
-    html.oldnote = content;
-    html.error = false;
+    initializeView(dbSheet, html);
 
     SpreadsheetApp.getUi().showSidebar(html.evaluate().setTitle('Cell Notes'));
 }
@@ -82,8 +51,10 @@ function getTextInput(
     const range = ss.getSheetByName(sheetName)?.getRange(rangeA1);
     const dbSheet = ss.getSheetByName(dbSheetName);
     const sidenote = new SideNote(key * 1, getUser(), new Date(), html);
-    addNewSideNote(range, dbSheet, sidenote);
-    return html;
+    if (range && dbSheet) {
+        addNewSideNote(range, dbSheet, sidenote);
+        return html;
+    }
 }
 
 function deleteSelectedRangeSN(
@@ -94,17 +65,23 @@ function deleteSelectedRangeSN(
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const range = ss?.getSheetByName(sheetName)?.getRange(rangeA1);
     const dbSheet = ss.getSheetByName(dbSheetName);
-    deleteSideNote(dbSheet, range);
+
+    if (range && dbSheet) {
+        deleteSideNote(dbSheet, range);
+    }
 }
 
 function exportSelected() {
-    //Check if SideNotes database is there already
+    // Check if SideNotes database is there already
     const sheet = getSideNotesSheet();
 
-    //Anything else that we want to do in SideNotes requires the database to exist.
-    //Don't even open the Export if there isn't one.
-    if (sheet != null) {
+    // Anything else that we want to do in SideNotes requires the database to exist.
+    // Don't even open the Export if there isn't one.
+    if (sheet) {
         const range = sheet.getActiveRange();
+        if (!range) {
+            return;
+        }
         const html = exportNotesInRange(sheet, range);
         const htmlOutput = HtmlService.createHtmlOutput(html);
         htmlOutput.setWidth(800);
@@ -115,11 +92,11 @@ function exportSelected() {
 }
 
 function exportAllMenu() {
-    //Check if SideNotes database is there already
+    // Check if SideNotes database is there already
     const sheet = getSideNotesSheet();
 
-    //Anything else that we want to do in SideNotes requires the database to exist.
-    //Don't even open the Export if there isn't one.
+    // Anything else that we want to do in SideNotes requires the database to exist.
+    // Don't even open the Export if there isn't one.
     if (sheet != null) {
         const html = exportAll(sheet);
         const htmlOutput = HtmlService.createHtmlOutput(html);
@@ -136,6 +113,31 @@ function getSideNotesSheet() {
     const sheet = checkSidenoteDatabase(ss);
     return sheet;
 }
+
+function initializeView(
+    dbSheet: GoogleAppsScript.Spreadsheet.Sheet,
+    html: GoogleAppsScript.HTML.HtmlTemplate
+) {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const dbSheetName = dbSheet.getSheetName();
+    const combined = getNoteForActiveRange(dbSheetName);
+    const splitter = combined.split('!@!@');
+    const key = splitter[0];
+    const content = splitter[1];
+    const sheetName = splitter[2];
+    const rangeA1formatted = splitter[3];
+    html.rangeA1 = rangeA1formatted;
+    html.sheetName = sheetName;
+    html.key = key;
+    html.dbSheet = dbSheet.getSheetName();
+    html.spreadsheetId = ss.getId();
+    html.note = content;
+    html.oldnote = content;
+    html.error = false;
+    const result = html.evaluate();
+    return result;
+}
+
 /*
 function getTempHtmlOutput(){
   var cache = CacheService.getUserCache();
