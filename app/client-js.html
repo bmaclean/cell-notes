@@ -49,7 +49,7 @@ function checkAlive() {
 
   function handleFormSubmit() {
       //   displayMessage('Saving...');
-      const currentNoteContent = quill.getContents();
+      const currentNoteContent = quill.root.innerHTML;
       const currentNoteLength = quill.getLength();
       const key = document.getElementById('key').innerHTML;
       const sheetName = document.getElementById('sheetName').innerHTML;
@@ -57,12 +57,16 @@ function checkAlive() {
       const dbSheet = document.getElementById('dbSheet').innerHTML;
       if (currentNoteLength < 50000) {
           google.script.run
-              //   .withSuccessHandler(displaySavedMessage)
+              .withSuccessHandler(() => console.log('a'))
+              //   .withFailureHandler((e) => {
+              //       console.log('error getting text input');
+              //       console.log(e);
+              //   })
               .getTextInput(key, sheetName, range, currentNoteContent, dbSheet);
       } else {
           //   displayMessage("Can't save. Cell note is too long!");
       }
-}
+  }
 
   function saveIfUpdated(currentContent) {
       const formerContent = document.getElementById('oldnote').innerHTML;
