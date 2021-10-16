@@ -81,7 +81,7 @@ function getKeyForRange(range: GoogleAppsScript.Spreadsheet.Range) {
     const note = range.getNote();
     if (note != undefined) {
         const key = extractKeyFromNoteText(note);
-        return key ?? null;
+        return key;
     }
     return null;
 }
@@ -106,11 +106,11 @@ function removeNoteFromRange(range: GoogleAppsScript.Spreadsheet.Range) {
     //catch(e){}
 
     const note = range.getNote();
-    if (note !== undefined) {
-        //remove each piece of the SideNote
+    if (note) {
+        // remove each piece of the SideNote
         const ammendedNote = deleteSideNoteFromNote(note);
         range.setNote(ammendedNote);
-        //range.clearNote();
+        // range.clearNote();
     }
 
     return key;
