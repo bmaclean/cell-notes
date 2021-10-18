@@ -17,7 +17,13 @@ function getNoteForActiveRange(dbSheetName: string) {
     if (!isSingleCell) {
         range = ss.getActiveCell();
     }
-    const rangeA1 = range?.getA1Notation();
+
+    if (!range || !dbSheet) {
+        // TODO: custom exception
+        throw Error;
+    }
+
+    const rangeA1 = range.getA1Notation();
 
     let key = getKeyForRange(range);
 
@@ -75,7 +81,7 @@ function getKeyForRange(range: GoogleAppsScript.Spreadsheet.Range) {
     const note = range.getNote();
     if (note != undefined) {
         const key = extractKeyFromNoteText(note);
-        return key ? parseInt(key) : null;
+        return key;
     }
     return null;
 }
@@ -100,17 +106,17 @@ function removeNoteFromRange(range: GoogleAppsScript.Spreadsheet.Range) {
     //catch(e){}
 
     const note = range.getNote();
-    if (note != undefined) {
-        //remove each piece of the SideNote
+    if (note) {
+        // remove each piece of the SideNote
         const ammendedNote = deleteSideNoteFromNote(note);
         range.setNote(ammendedNote);
-        //range.clearNote();
+        // range.clearNote();
     }
 
     return key;
 }
 
-function deleteSideNoteFromNote(note) {
+function deleteSideNoteFromNote(note: string) {
     const start = note.indexOf(preText);
     const end = note.indexOf(postTextShort) + postTextShort.length;
     const textToDelete = note.substring(start, end);
