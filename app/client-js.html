@@ -61,7 +61,7 @@
                   state.error = error.message;
               })
               .initializeState();
-          poll();
+          poll({firstPoll: true});
       }
   }
 
@@ -103,7 +103,7 @@ function checkAlive() {
       const dbSheet = state.dbSheet;
       if (currentNoteLength < 50000) {
           google.script.run
-              .withSuccessHandler(() => console.log('a'))
+              .withSuccessHandler(() => console.log('Submitted'))
               //   .withFailureHandler((e) => {
               //       console.log('error getting text input');
               //       console.log(e);
@@ -114,27 +114,23 @@ function checkAlive() {
       }
   }
 
-  function updateCellRange() {
+  function updateCellRange(forceUpdate) {
       const dbSheet = state.dbSheet;
-      const currentNoteContent = quill.root.innerHTML;
-      state.currentNote = JSON.stringify(currentNoteContent);
-      if (currentNoteContent) {
-          try {
-              google.script.run
-                  .withSuccessHandler(function (data, element) {
-                      if (data) {
-                          const splitter = data.split('!@!@');
-                          const [
-                              key,
-                              content,
-                              sheetName,
-                              rangeA1formatted,
-                              error,
-                          ] = splitter;
-                          //   const oldError = document.getElementById('error').innerHTML;
-  
-                          //   displayError(error == 'true', oldError != error);
-                          //   document.getElementById('error').innerHTML = error;
+      try {
+          google.script.run
+              .withSuccessHandler(function (data, element) {
+                  if (data) {
+                      const splitter = data.split('!@!@');
+                      const [
+                          key,
+                          content,
+                          sheetName,
+                          rangeA1formatted,
+                          error,
+                      ] = splitter;
+                      if (forceUpdate || rangeA1formatted !== state.rangeA1) {
+                          //   if (state.rangeA1 !== rangeA1formatted) {
+                          // here we will need to save prior to storing new values
                           state.key = key;
                           state.sheetName = sheetName;
                           state.rangeA1 = rangeA1formatted;
@@ -143,17 +139,22 @@ function checkAlive() {
                           state.currentNote = content;
 
                           quill.setContents(quill.clipboard.convert(content));
-                          //CKEDITOR.instances.editor1.setData(content);
-                          //   displayMessage('');
                       }
-                  })
-                  .withFailureHandler(function (msg, element) {
-                      // code to execute if data was not gotten ok
-                  })
-                  .getNoteForActiveRange(dbSheet);
-          } catch (err) {
-              console.error(err);
-          }
+                      //   const oldError = document.getElementById('error').innerHTML;
+  
+                      //   displayError(error == 'true', oldError != error);
+                      //   document.getElementById('error').innerHTML = error;
+                      //CKEDITOR.instances.editor1.setData(content);
+                      //   displayMessage('');
+                      //   }
+                  }
+              })
+              .withFailureHandler((error) => {
+                  console.log({getNoteError: error});
+              })
+              .getNoteForActiveRange(dbSheet);
+      } catch (err) {
+          console.error(err);
       }
       poll();
   }
@@ -169,19 +170,18 @@ function checkAlive() {
    * @param {Number} interval   (optional) Time in ms between polls.
    *                            Default is 2s (2000ms)
    */
-  function poll(interval) {
+  function poll({firstPoll = false} = {}) {
       /**
        * TODO: there may be a better way to do this using Quill's editor-change callback;
        * listen for changes in the editor to determine if we should write to the DB; not
        * do it on a polled interval (reading from the DB based on cell selection will likely
        * have to remain in a polling interval)
        * */
-      console.log({state});
-      interval = interval || 2000;
+      const pollingInterval = 2000;
 
       setTimeout(function () {
-          updateCellRange();
-      }, interval);
+          updateCellRange(firstPoll);
+      }, pollingInterval);
   
       setTimeout(function () {
           checkAlive();
