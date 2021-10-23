@@ -32,8 +32,8 @@ function getNoteWithKey(
         // mfg_tag assuming the order of the headers will stay the same for now
         if (rowKey != undefined) {
             const content = rowKey == 'DELETED' ? '' : rowContent;
-            const sidenote = new SideNote(key, user, date, content);
-            return sidenote;
+            const sideNote = new SideNote(key, user, date, content);
+            return sideNote;
         }
     }
     return null;

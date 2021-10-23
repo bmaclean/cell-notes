@@ -6,8 +6,8 @@ function getUser() {
 
     //Otherwise use a temp user active key at least
     if (username.length < 1) {
-        const secretuser = Session.getTemporaryActiveUserKey();
-        user = secretuser;
+        const secretUser = Session.getTemporaryActiveUserKey();
+        user = secretUser;
     } else {
         user = username;
     }

@@ -52,12 +52,12 @@ function createSidenoteDatabase(ss: GoogleAppsScript.Spreadsheet.Spreadsheet) {
     activeSheet.activate();
 
     //configure database
-    configureSidenoteDatabase(sideNoteSheet);
+    configureSideNoteDatabase(sideNoteSheet);
 
     return sideNoteSheet;
 }
 
-function configureSidenoteDatabase(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
+function configureSideNoteDatabase(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
     //we don't want users to see the database
     sheet.hideSheet();
 
