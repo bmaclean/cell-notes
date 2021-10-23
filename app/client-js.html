@@ -29,6 +29,9 @@
           quill.on('text-change', (delta, oldDelta, source) => {
               //   if user, submit, if api, ignore
               console.log('text changed', {delta, oldDelta, source});
+              if (source === 'user') {
+                  handleFormSubmit();
+              }
           });
           google.script.run
               .withSuccessHandler((data) => {
@@ -98,20 +101,10 @@ function checkAlive() {
       }
   }
 
-  function saveIfUpdated(currentContent) {
-      const formerContent = state.prevNote;
-      console.log({formerContent, currentContent});
-
-      if (currentContent && currentContent !== formerContent) {
-          handleFormSubmit();
-      }
-  }
-
   function updateCellRange() {
       const dbSheet = state.dbSheet;
       const currentNoteContent = quill.root.innerHTML;
       state.currentNote = JSON.stringify(currentNoteContent);
-      saveIfUpdated(currentNoteContent);
       if (currentNoteContent) {
           try {
               google.script.run
@@ -129,19 +122,16 @@ function checkAlive() {
   
                           //   displayError(error == 'true', oldError != error);
                           //   document.getElementById('error').innerHTML = error;
-                          if (state.rangeA1 !== rangeA1formatted) {
-                              // here we will need to save prior to storing new values
-                              state.key = key;
-                              state.sheetName = sheetName;
-                              state.rangeA1 = rangeA1formatted;
-                              state.error = error || null;
-                              state.prevNote = content;
-                              state.currentNote = content;
+                          state.key = key;
+                          state.sheetName = sheetName;
+                          state.rangeA1 = rangeA1formatted;
+                          state.error = error || null;
+                          state.prevNote = content;
+                          state.currentNote = content;
 
-                              quill.setContents(quill.clipboard.convert(content));
-                              //CKEDITOR.instances.editor1.setData(content);
-                              //   displayMessage('');
-                          }
+                          quill.setContents(quill.clipboard.convert(content));
+                          //CKEDITOR.instances.editor1.setData(content);
+                          //   displayMessage('');
                       }
                   })
                   .withFailureHandler(function (msg, element) {
