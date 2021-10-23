@@ -4,6 +4,15 @@
 
 <script>
   let quill;
+  let state = {
+      rangeA1: null,
+      key: null,
+      error: null,
+      // TODO: use Sheet ID
+      sheetName: null,
+      dbSheet: null,
+  };
+
   function init() {
       if (!$('#editor').size()) {
           window.requestAnimationFrame(init);
@@ -15,6 +24,23 @@
               placeholder: 'Write some notes...',
               theme: 'snow',
           });
+          quill.on('text-change', (delta, oldDelta, source) => {
+              //   if user, submit, if api, ignore
+              console.log('text changed', {delta, oldDelta, source});
+          });
+          google.script.run
+              .withSuccessHandler((data) => {
+                  state.rangeA1 = data.rangeA1;
+                  state.key = data.key;
+                  state.error = data.error;
+                  state.sheetName = data.sheetName;
+                  state.dbSheet = data.dbSheet;
+              })
+              .withFailureHandler((error) => {
+                  console.log({error});
+                  state.error = error.message;
+              })
+              .initializeState();
           poll();
       }
   }
@@ -51,10 +77,10 @@ function checkAlive() {
       //   displayMessage('Saving...');
       const currentNoteContent = quill.root.innerHTML;
       const currentNoteLength = quill.getLength();
-      const key = document.getElementById('key').innerHTML;
-      const sheetName = document.getElementById('sheetName').innerHTML;
-      const range = document.getElementById('rangeA1').innerHTML;
-      const dbSheet = document.getElementById('dbSheet').innerHTML;
+      const key = state.key;
+      const range = state.rangeA1;
+      const sheetName = state.sheetName;
+      const dbSheet = state.dbSheet;
       if (currentNoteLength < 50000) {
           google.script.run
               .withSuccessHandler(() => console.log('a'))
@@ -70,6 +96,7 @@ function checkAlive() {
 
   function saveIfUpdated(currentContent) {
       const formerContent = document.getElementById('oldnote').innerHTML;
+      console.log({formerContent, currentContent});
 
       if (currentContent && currentContent !== formerContent) {
           handleFormSubmit();
@@ -77,8 +104,8 @@ function checkAlive() {
   }
 
   function updateCellRange() {
-      const dbSheet = document.getElementById('dbSheet').innerHTML;
-      const currentNoteContent = quill.getContents();
+      const dbSheet = state.dbSheet;
+      const currentNoteContent = quill.root.innerHTML;
       document.getElementById('current-note').innerHTML = JSON.stringify(
           currentNoteContent
       );
@@ -100,18 +127,12 @@ function checkAlive() {
   
                           //   displayError(error == 'true', oldError != error);
                           //   document.getElementById('error').innerHTML = error;
-                          if (
-                              document.getElementById('rangeA1').innerHTML !==
-                              rangeA1formatted
-                          ) {
+                          if (state.rangeA1 !== rangeA1formatted) {
                               // here we will need to save prior to storing new values
-                              document.getElementById('key').innerHTML = key;
-                              document.getElementById(
-                                  'sheetName'
-                              ).innerHTML = sheetName;
-                              document.getElementById(
-                                  'rangeA1'
-                              ).innerHTML = rangeA1formatted;
+                              state.key = key;
+                              state.sheetName = sheetName;
+                              state.rangeA1 = rangeA1formatted;
+                              state.error = error || null;
   
                               quill.setContents(quill.clipboard.convert(content));
                               //CKEDITOR.instances.editor1.setData(content);
@@ -154,6 +175,7 @@ function checkAlive() {
        * do it on a polled interval (reading from the DB based on cell selection will likely
        * have to remain in a polling interval)
        * */
+      console.log({state});
       interval = interval || 2000;
 
       setTimeout(function () {

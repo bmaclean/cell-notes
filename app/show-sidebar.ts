@@ -125,11 +125,18 @@ function initializeView(
     const key = splitter[0];
     const content = splitter[1];
     const sheetName = splitter[2];
-    const rangeA1formatted = splitter[3];
-    html.rangeA1 = rangeA1formatted;
-    html.sheetName = sheetName;
-    html.key = key;
-    html.dbSheet = dbSheet.getSheetName();
+    const rangeA1 = splitter[3];
+    const props = PropertiesService.getUserProperties();
+    props.setProperties({
+        rangeA1,
+        sheetName,
+        key,
+        dbSheet: dbSheetName,
+        spreadsheetId: ss.getId(),
+        note: content,
+        oldnote: content,
+        error: '',
+    });
     html.spreadsheetId = ss.getId();
     html.note = content;
     html.oldnote = content;

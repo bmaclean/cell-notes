@@ -32,6 +32,12 @@ function promptNoImageOnSidebar() {
     }
 }
 
+function initializeState() {
+    const props = PropertiesService.getUserProperties();
+
+    return props.getProperties();
+}
+
 function setAlive() {
     const lastSeenDate = new Date();
     PropertiesService.getUserProperties().setProperty(
