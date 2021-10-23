@@ -133,14 +133,11 @@ function initializeView(
         key,
         dbSheet: dbSheetName,
         spreadsheetId: ss.getId(),
-        note: content,
-        oldnote: content,
+        currentNote: content,
+        prevNote: content,
         error: '',
     });
     html.spreadsheetId = ss.getId();
-    html.note = content;
-    html.oldnote = content;
-    html.error = false;
     const result = html.evaluate();
     return result;
 }

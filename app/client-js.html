@@ -11,6 +11,8 @@
       // TODO: use Sheet ID
       sheetName: null,
       dbSheet: null,
+      prevNote: null,
+      currentNote: null,
   };
 
   function init() {
@@ -35,6 +37,8 @@
                   state.error = data.error;
                   state.sheetName = data.sheetName;
                   state.dbSheet = data.dbSheet;
+                  state.prevNote = data.prevNote;
+                  state.currentNote = data.currentNote;
               })
               .withFailureHandler((error) => {
                   console.log({error});
@@ -95,7 +99,7 @@ function checkAlive() {
   }
 
   function saveIfUpdated(currentContent) {
-      const formerContent = document.getElementById('oldnote').innerHTML;
+      const formerContent = state.prevNote;
       console.log({formerContent, currentContent});
 
       if (currentContent && currentContent !== formerContent) {
@@ -106,9 +110,7 @@ function checkAlive() {
   function updateCellRange() {
       const dbSheet = state.dbSheet;
       const currentNoteContent = quill.root.innerHTML;
-      document.getElementById('current-note').innerHTML = JSON.stringify(
-          currentNoteContent
-      );
+      state.currentNote = JSON.stringify(currentNoteContent);
       saveIfUpdated(currentNoteContent);
       if (currentNoteContent) {
           try {
@@ -133,15 +135,11 @@ function checkAlive() {
                               state.sheetName = sheetName;
                               state.rangeA1 = rangeA1formatted;
                               state.error = error || null;
-  
+                              state.prevNote = content;
+                              state.currentNote = content;
+
                               quill.setContents(quill.clipboard.convert(content));
                               //CKEDITOR.instances.editor1.setData(content);
-                              document.getElementById(
-                                  'oldnote'
-                              ).innerHTML = content;
-                              document.getElementById(
-                                  'current-note'
-                              ).innerHTML = content;
                               //   displayMessage('');
                           }
                       }
