@@ -15,6 +15,16 @@
       currentNote: null,
   };
 
+  function debounce(callback, wait) {
+      let timerId;
+      return (...args) => {
+          clearTimeout(timerId);
+          timerId = setTimeout(() => {
+              callback(...args);
+          }, wait);
+      };
+}
+
   function init() {
       if (!$('#editor').size()) {
           window.requestAnimationFrame(init);
@@ -26,13 +36,16 @@
               placeholder: 'Write some notes...',
               theme: 'snow',
           });
-          quill.on('text-change', (delta, oldDelta, source) => {
-              //   if user, submit, if api, ignore
-              console.log('text changed', {delta, oldDelta, source});
-              if (source === 'user') {
-                  handleFormSubmit();
-              }
-          });
+          quill.on(
+              'text-change',
+              debounce((delta, oldDelta, source) => {
+                  //   if user, submit, if api, ignore
+                  console.log('text changed', {delta, oldDelta, source});
+                  if (source === 'user') {
+                      handleFormSubmit();
+                  }
+              }, 1000)
+          );
           google.script.run
               .withSuccessHandler((data) => {
                   state.rangeA1 = data.rangeA1;
