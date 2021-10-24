@@ -73,7 +73,7 @@
       google.script.run
           .withSuccessHandler(function () {})
           .withFailureHandler(function (msg, element) {
-              google.script.run.showAlert("Couldn't open full size editor", msg);
+              google.script.run.showAlert('Couldn\'t open full size editor', msg);
           })
           .showExpandedSideNotes();
   }
@@ -107,20 +107,23 @@
   function handleFormSubmit() {
       //   displayMessage('Saving...');
       const currentNoteContent = quill.root.innerHTML;
-      const currentNoteLength = quill.getLength();
       const key = state.key;
       const range = state.rangeA1;
       const sheetName = state.sheetName;
       const dbSheet = state.dbSheet;
-      if (currentNoteLength < 50000) {
+      if (currentNoteContent.length < 50000) {
           google.script.run
               .withSuccessHandler(() => console.log('Submitted'))
               //   .withFailureHandler((e) => {
               //       console.log('error getting text input');
               //       console.log(e);
               //   })
+              .withFailureHandler((error) => {
+                  console.error({error});
+              })
               .getTextInput(key, sheetName, range, currentNoteContent, dbSheet);
       } else {
+          console.error('Contents too long!');
           //   displayMessage("Can't save. Cell note is too long!");
       }
   }
