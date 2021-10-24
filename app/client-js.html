@@ -46,6 +46,7 @@
                   }
               }, 1000)
           );
+          document.getElementById('editor-expand').onclick = fullSize;
           google.script.run
               .withSuccessHandler((data) => {
                   state.rangeA1 = data.rangeA1;
@@ -67,6 +68,16 @@
 
   init();
 
+  function fullSize() {
+      console.log('full size');
+      google.script.run
+          .withSuccessHandler(function () {})
+          .withFailureHandler(function (msg, element) {
+              google.script.run.showAlert("Couldn't open full size editor", msg);
+          })
+          .showExpandedSideNotes();
+  }
+
   function setAlive() {
       var isSidebar = document.getElementById('isSidebar').innerHTML == 'true';
       if (!isSidebar) {
@@ -74,7 +85,7 @@
       }
   }
 
-function checkAlive() {
+  function checkAlive() {
       var isSidebar = document.getElementById('isSidebar').innerHTML == 'true';
       if (isSidebar) {
           google.script.run

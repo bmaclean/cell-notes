@@ -21,7 +21,7 @@ function showExpandedSideNotes() {
 }
 
 function showExpandedDialog(dbSheet: GoogleAppsScript.Spreadsheet.Sheet) {
-    const html = HtmlService.createTemplateFromFile('dialog-editor');
+    const html = HtmlService.createTemplateFromFile('editor');
     const result = initializeView(dbSheet, html);
     result.setWidth(800);
     result.setHeight(600);
