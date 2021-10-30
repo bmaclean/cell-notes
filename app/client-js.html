@@ -68,12 +68,29 @@
 
   init();
 
+  function setStatusText(text) {
+      document.getElementById('status').innerHTML = text;
+  }
+
+  let currentMessageResetId = null;
+  function displayMessage(message, {timeout} = {timeout: 3000}) {
+      if (currentMessageResetId) {
+          clearTimeout(currentMessageResetId);
+      }
+
+      setStatusText(message);
+
+      currentMessageResetId = setTimeout(() => {
+          setStatusText('');
+      }, timeout);
+  }
+
   function fullSize() {
       console.log('full size');
       google.script.run
           .withSuccessHandler(function () {})
           .withFailureHandler(function (msg, element) {
-              google.script.run.showAlert('Couldn\'t open full size editor', msg);
+              google.script.run.showAlert("Couldn't open full size editor", msg);
           })
           .showExpandedSideNotes();
   }
@@ -105,7 +122,7 @@
 }
 
   function handleFormSubmit() {
-      //   displayMessage('Saving...');
+      displayMessage('Saving...');
       const currentNoteContent = quill.root.innerHTML;
       const key = state.key;
       const range = state.rangeA1;
@@ -113,7 +130,9 @@
       const dbSheet = state.dbSheet;
       if (currentNoteContent.length < 50000) {
           google.script.run
-              .withSuccessHandler(() => console.log('Submitted'))
+              .withSuccessHandler(() => {
+                  displayMessage('Saved', {timeout: 1000});
+              })
               //   .withFailureHandler((e) => {
               //       console.log('error getting text input');
               //       console.log(e);
