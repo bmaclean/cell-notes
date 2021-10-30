@@ -17,10 +17,10 @@ function getNextAvailableKey(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
 
 function saveSideNote(
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
-    sidenote: SideNote
+    sideNote: SideNote
 ) {
-    //first check if sidenote has a key
-    let key = sidenote.key;
+    //first check if sideNote has a key
+    let key = sideNote.key;
     const hasKey = key > -1;
 
     //check if key exists
@@ -32,14 +32,14 @@ function saveSideNote(
     } else {
         index = getNextAvailableRowIndex(sheet);
         key = index; //getNextAvailableKey(sheet,index);
-        sidenote.key = key;
+        sideNote.key = key;
     }
 
     if (!index) {
         throw 'There was a problem saving your cell note.';
     } else {
-        writeSideNoteToRowWithIndex(sheet, index, sidenote);
-        return sidenote;
+        writeSideNoteToRowWithIndex(sheet, index, sideNote);
+        return sideNote;
     }
 }
 
@@ -58,7 +58,7 @@ function deleteSideNoteWithKey(
 function writeSideNoteToRowWithIndex(
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     index: number,
-    sidenote: SideNote
+    sideNote: SideNote
 ) {
     //get range - may be a new range or an existing range
     const rowRange = sheet.getRange(index, 1, 1, numCols);
@@ -66,10 +66,10 @@ function writeSideNoteToRowWithIndex(
     //prepare data as a row
     const sidenoteData = [];
     const rowData = [
-        sidenote.key,
-        sidenote.user,
-        sidenote.date,
-        sidenote.content,
+        sideNote.key,
+        sideNote.user,
+        sideNote.date,
+        sideNote.content,
     ];
     sidenoteData.push(rowData);
 

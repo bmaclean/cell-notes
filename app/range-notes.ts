@@ -27,23 +27,23 @@ function getNoteForActiveRange(dbSheetName: string) {
 
     let key = getKeyForRange(range);
 
-    let sidenote;
+    let sideNote;
     let combined = '';
     if (key == null) {
         //generating a key here so it can then lookup afterwards for a new row in the db
         key = getNextAvailableKey(dbSheet);
-        sidenote = new SideNote(key, getUser(), new Date(), '');
+        sideNote = new SideNote(key, getUser(), new Date(), '');
     } else {
-        sidenote = getNoteWithKey(dbSheet, key);
-        if (sidenote == null) {
+        sideNote = getNoteWithKey(dbSheet, key);
+        if (sideNote == null) {
             key = getNextAvailableKey(dbSheet);
-            sidenote = new SideNote(key, getUser(), new Date(), '');
+            sideNote = new SideNote(key, getUser(), new Date(), '');
         }
     }
     combined =
-        sidenote.key +
+        sideNote.key +
         '!@!@' +
-        sidenote.content +
+        sideNote.content +
         '!@!@' +
         sheetName +
         '!@!@' +

@@ -1,6 +1,6 @@
-<img src="./assets/logo.png" width="200" />
+# <img src="./assets/logo.png" width="50" /> &nbsp;Cell Notes
 
-# Cell Notes
+## v2.0.0-beta
 
 ## Installation and Setup
 

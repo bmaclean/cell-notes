@@ -3,10 +3,10 @@ function addNewSideNote(
     dbSheet: GoogleAppsScript.Spreadsheet.Sheet,
     sidenote: SideNote
 ) {
-    const newSidenote = saveSideNote(dbSheet, sidenote);
-    addNoteWithKeyToRange(newSidenote.key, range);
+    const newSideNote = saveSideNote(dbSheet, sidenote);
+    addNoteWithKeyToRange(newSideNote.key, range);
     //showAlert("just saved cell:",range.getA1Notation() + "in key " + sidenote.key)
-    return newSidenote;
+    return newSideNote;
 }
 
 function deleteSideNote(
@@ -30,6 +30,12 @@ function promptNoImageOnSidebar() {
     if (response == true) {
         showExpandedSideNotes();
     }
+}
+
+function initializeState() {
+    const props = PropertiesService.getUserProperties();
+
+    return props.getProperties();
 }
 
 function setAlive() {

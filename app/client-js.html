@@ -4,6 +4,27 @@
 
 <script>
   let quill;
+  let state = {
+      rangeA1: null,
+      key: null,
+      error: null,
+      // TODO: use Sheet ID
+      sheetName: null,
+      dbSheet: null,
+      prevNote: null,
+      currentNote: null,
+  };
+
+  function debounce(callback, wait) {
+      let timerId;
+      return (...args) => {
+          clearTimeout(timerId);
+          timerId = setTimeout(() => {
+              callback(...args);
+          }, wait);
+      };
+}
+
   function init() {
       if (!$('#editor').size()) {
           window.requestAnimationFrame(init);
@@ -15,11 +36,64 @@
               placeholder: 'Write some notes...',
               theme: 'snow',
           });
-          poll();
+          quill.on(
+              'text-change',
+              debounce((delta, oldDelta, source) => {
+                  //   if user, submit, if api, ignore
+                  console.log('text changed', {delta, oldDelta, source});
+                  if (source === 'user') {
+                      handleFormSubmit();
+                  }
+              }, 1000)
+          );
+          document.getElementById('editor-expand').onclick = fullSize;
+          google.script.run
+              .withSuccessHandler((data) => {
+                  state.rangeA1 = data.rangeA1;
+                  state.key = data.key;
+                  state.error = data.error;
+                  state.sheetName = data.sheetName;
+                  state.dbSheet = data.dbSheet;
+                  state.prevNote = data.prevNote;
+                  state.currentNote = data.currentNote;
+              })
+              .withFailureHandler((error) => {
+                  console.log({error});
+                  state.error = error.message;
+              })
+              .initializeState();
+          poll({firstPoll: true});
       }
   }
 
   init();
+
+  function setStatusText(text) {
+      document.getElementById('status').innerHTML = text;
+  }
+
+  let currentMessageResetId = null;
+  function displayMessage(message, {timeout} = {timeout: 3000}) {
+      if (currentMessageResetId) {
+          clearTimeout(currentMessageResetId);
+      }
+
+      setStatusText(message);
+
+      currentMessageResetId = setTimeout(() => {
+          setStatusText('');
+      }, timeout);
+  }
+
+  function fullSize() {
+      console.log('full size');
+      google.script.run
+          .withSuccessHandler(function () {})
+          .withFailureHandler(function (msg, element) {
+              google.script.run.showAlert("Couldn't open full size editor", msg);
+          })
+          .showExpandedSideNotes();
+  }
 
   function setAlive() {
       var isSidebar = document.getElementById('isSidebar').innerHTML == 'true';
@@ -28,7 +102,7 @@
       }
   }
 
-function checkAlive() {
+  function checkAlive() {
       var isSidebar = document.getElementById('isSidebar').innerHTML == 'true';
       if (isSidebar) {
           google.script.run
@@ -48,90 +122,72 @@ function checkAlive() {
 }
 
   function handleFormSubmit() {
-      //   displayMessage('Saving...');
+      displayMessage('Saving...');
       const currentNoteContent = quill.root.innerHTML;
-      const currentNoteLength = quill.getLength();
-      const key = document.getElementById('key').innerHTML;
-      const sheetName = document.getElementById('sheetName').innerHTML;
-      const range = document.getElementById('rangeA1').innerHTML;
-      const dbSheet = document.getElementById('dbSheet').innerHTML;
-      if (currentNoteLength < 50000) {
+      const key = state.key;
+      const range = state.rangeA1;
+      const sheetName = state.sheetName;
+      const dbSheet = state.dbSheet;
+      if (currentNoteContent.length < 50000) {
           google.script.run
-              .withSuccessHandler(() => console.log('a'))
+              .withSuccessHandler(() => {
+                  displayMessage('Saved', {timeout: 1000});
+              })
               //   .withFailureHandler((e) => {
               //       console.log('error getting text input');
               //       console.log(e);
               //   })
+              .withFailureHandler((error) => {
+                  console.error({error});
+              })
               .getTextInput(key, sheetName, range, currentNoteContent, dbSheet);
       } else {
+          console.error('Contents too long!');
           //   displayMessage("Can't save. Cell note is too long!");
       }
   }
 
-  function saveIfUpdated(currentContent) {
-      const formerContent = document.getElementById('oldnote').innerHTML;
+  function updateCellRange(forceUpdate) {
+      const dbSheet = state.dbSheet;
+      try {
+          google.script.run
+              .withSuccessHandler(function (data, element) {
+                  if (data) {
+                      const splitter = data.split('!@!@');
+                      const [
+                          key,
+                          content,
+                          sheetName,
+                          rangeA1formatted,
+                          error,
+                      ] = splitter;
+                      if (forceUpdate || rangeA1formatted !== state.rangeA1) {
+                          //   if (state.rangeA1 !== rangeA1formatted) {
+                          // here we will need to save prior to storing new values
+                          state.key = key;
+                          state.sheetName = sheetName;
+                          state.rangeA1 = rangeA1formatted;
+                          state.error = error || null;
+                          state.prevNote = content;
+                          state.currentNote = content;
 
-      if (currentContent && currentContent !== formerContent) {
-          handleFormSubmit();
-      }
-  }
-
-  function updateCellRange() {
-      const dbSheet = document.getElementById('dbSheet').innerHTML;
-      const currentNoteContent = quill.getContents();
-      document.getElementById('current-note').innerHTML = JSON.stringify(
-          currentNoteContent
-      );
-      saveIfUpdated(currentNoteContent);
-      if (currentNoteContent) {
-          try {
-              google.script.run
-                  .withSuccessHandler(function (data, element) {
-                      if (data) {
-                          const splitter = data.split('!@!@');
-                          const [
-                              key,
-                              content,
-                              sheetName,
-                              rangeA1formatted,
-                              error,
-                          ] = splitter;
-                          //   const oldError = document.getElementById('error').innerHTML;
-  
-                          //   displayError(error == 'true', oldError != error);
-                          //   document.getElementById('error').innerHTML = error;
-                          if (
-                              document.getElementById('rangeA1').innerHTML !==
-                              rangeA1formatted
-                          ) {
-                              // here we will need to save prior to storing new values
-                              document.getElementById('key').innerHTML = key;
-                              document.getElementById(
-                                  'sheetName'
-                              ).innerHTML = sheetName;
-                              document.getElementById(
-                                  'rangeA1'
-                              ).innerHTML = rangeA1formatted;
-  
-                              quill.setContents(quill.clipboard.convert(content));
-                              //CKEDITOR.instances.editor1.setData(content);
-                              document.getElementById(
-                                  'oldnote'
-                              ).innerHTML = content;
-                              document.getElementById(
-                                  'current-note'
-                              ).innerHTML = content;
-                              //   displayMessage('');
-                          }
+                          quill.setContents(quill.clipboard.convert(content));
                       }
-                  })
-                  .withFailureHandler(function (msg, element) {
-                      // code to execute if data was not gotten ok
-                  })
-                  .getNoteForActiveRange(dbSheet);
-          } catch (err) {
-              console.error(err);
-          }
+                      //   const oldError = document.getElementById('error').innerHTML;
+  
+                      //   displayError(error == 'true', oldError != error);
+                      //   document.getElementById('error').innerHTML = error;
+                      //CKEDITOR.instances.editor1.setData(content);
+                      //   displayMessage('');
+                      //   }
+                  }
+              })
+              .withFailureHandler((error) => {
+                  console.log({getNoteError: error});
+              })
+              .getNoteForActiveRange(dbSheet);
+      } catch (err) {
+          console.error(err);
       }
       poll();
   }
@@ -147,18 +203,18 @@ function checkAlive() {
    * @param {Number} interval   (optional) Time in ms between polls.
    *                            Default is 2s (2000ms)
    */
-  function poll(interval) {
+  function poll({firstPoll = false} = {}) {
       /**
        * TODO: there may be a better way to do this using Quill's editor-change callback;
        * listen for changes in the editor to determine if we should write to the DB; not
        * do it on a polled interval (reading from the DB based on cell selection will likely
        * have to remain in a polling interval)
        * */
-      interval = interval || 2000;
+      const pollingInterval = 2000;
 
       setTimeout(function () {
-          updateCellRange();
-      }, interval);
+          updateCellRange(firstPoll);
+      }, pollingInterval);
   
       setTimeout(function () {
           checkAlive();

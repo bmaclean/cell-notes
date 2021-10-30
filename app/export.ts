@@ -20,32 +20,32 @@ function exportNotesInRange(
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     range: GoogleAppsScript.Spreadsheet.Range
 ) {
-    const sidenotes = getSideNotesInRange(sheet, range);
-    const cellcontents = range.getValues();
+    const sideNotes = getSideNotesInRange(sheet, range);
+    const cellContents = range.getValues();
     let table =
         '<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">' +
-        '<table style=\'width:100%;border-collapse: collapse\'>';
-    let htmlcell = '';
+        "<table style='width:100%;border-collapse: collapse'>";
+    let htmlCell = '';
     let superscript = '';
     let key: string | number | undefined = 0;
     let index = 1;
     let item: string | undefined = '';
     let appendix = '<ol>';
-    for (let i = 0; i < cellcontents.length; i++) {
+    for (let i = 0; i < cellContents.length; i++) {
         table += '<tr>';
-        for (let j = 0; j < cellcontents[i].length; j++) {
-            key = sidenotes[i][j] != null ? sidenotes[i][j]?.key : '';
+        for (let j = 0; j < cellContents[i].length; j++) {
+            key = sideNotes[i][j] != null ? sideNotes[i][j]?.key : '';
             superscript =
                 key != '' && key != 'DELETED' ? '<sup>' + index + '</sup>' : '';
-            htmlcell =
-                '<td style=\'border: 1px solid black\'>' +
-                cellcontents[i][j].toString() +
+            htmlCell =
+                "<td style='border: 1px solid black'>" +
+                cellContents[i][j].toString() +
                 superscript +
                 '</td>';
-            table += htmlcell;
+            table += htmlCell;
             if (key != '' && key != 'DELETED') {
-                item = sidenotes[i][j]?.content;
-                appendix += '<li value=\'' + index + '\'>' + item + '</li>';
+                item = sideNotes[i][j]?.content;
+                appendix += "<li value='" + index + "'>" + item + '</li>';
                 index++;
             }
         }
